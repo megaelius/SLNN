@@ -16,9 +16,6 @@ Generals:
         1: GM
         2: CGM
         3: BFGS
-        4: NM
-        5: MNM-SD
-        6: MNM-CMI
 
 CGM:
     icg -> variant
@@ -36,39 +33,38 @@ CGM:
 ----------------------- Variables de sortida ----------------------------
 Generals:
     xk -> Vector de posicions
-    dk -> Vector de direccions de descens
-    alk -> Vector de alfes
     iWk -> Condicions de Wolfe que satisfà:
             0: No satisfà res
             1: Satisfà WC1
             2: Satisfà WC2
             3: Satisfà SWC
+    niter -> Numero d'iteracions que fa l'algorisme
 %}
 
 
 
-function [xk,dk,gk,alk,iWk,betak,Hk,tauk] = om_uo_solve(x,f,g,h,epsG,kmax,almax,almin,rho,c1,c2,iW,isd,icg,irc,nu,delta)
+function [xk,iWk,niter] = om_uo_solve(x,f,g,epsG,kmax,c1,c2,isd,icg,irc,epsal,kmaxBLS)
     n = length(x); k = 1;
     xk = zeros(n, kmax); dk = zeros(n, kmax); Hk = zeros(n, n, kmax);
-    iWk = zeros(1, kmax);
+    iWk = zeros(1, kmax); al = zeros()
     xk(:, 1) = x; Hk(:, :, 1) = eye(n);  % Initialation vector
-    while k < kmax && norm(gk(:, k)) > epsG
+    while k < kmax && norm(g(xk(:, k))) > epsG
+        xact = x(:, k);
         % Computation of the descent direction given the method
-        [dk(:, k), Hk(:, :, k)] = descent_direction(xk, gk, Hk(:, :, k), isd, icg, irc, nu, dk, k, h, delta);
+        [dk(:, k), Hk(:, :, k)] = descent_direction(xk, gk, Hk(:, :, k), isd, icg, irc, dk, k);
         % Computation of the alfa given the descent direction
-        if isd == 4, alk(k) = 1; iWk(k) = 4;
-        else, [al, iWk(k)] = find_alfa(xk(:, k), dk(:, k), f, g, almin, almax, rho, c1, c2, iW, Hk(:, :, k));
-        end
-
+        alpham = 2 * (f(xact) - f(xk(:, k - 1))) / (g(xact)' * dk(:, k))
+        [al, iWk(k)] = uo_BLSNW32(f,g0,x0,d,alpham,c1,c2,kmaxBLS,epsal)
         % Vector's update
-        xk(:, k + 1) = xk(:, k) + al*dk(:, k);
+        xk(:, k + 1) = xact + al*dk(:, k);
         if isd == 3
-            y = g(xk(:, k + 1)) - g(xk(:, k)); s = xk(:, k + 1) - xk(:, k); rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
+            y = g(xk(:, k + 1)) - g(xact); s = xk(:, k + 1) - xact; rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
             Hk(:, :, k + 1) = (eye(n) - rhok*s*y') * Hk(:, :, k) * (eye(n) - rhok*y*s') + rhok*(s*s');
         end
         k = k + 1;
     end
-    iWk = iWk(1:k); iWk(k) = NaN; xk = xk(:, 1:k); dk = dk(:, 1:k); Hk = Hk(:, :, 1:k);
+    iWk = iWk(1:k); iWk(k) = NaN; xk = xk(:, 1:k);
+    niter = k;
 end
 
 
