@@ -4,14 +4,10 @@ clear;
 %
 num_target = [3];       % Number we want to recognize.
 tr_freq    = .5;        % Frequency of the number we want to recongize in the training set.
-tr_n       = 250;       % Number of training images.
-te_n       = 250;       % Number of test images.
+tr_p       = 250;       % Number of training images.
+te_q       = 250;       % Number of test images.
 tr_seed    = 123456;    % Seed of the training.
 te_seed    = 789101;    % Seed of the test.
-
-[Xtr,ytr] = uo_nn_dataset(tr_seed, tr_n, num_target, tr_freq);
-[Xte, yte] = uo_nn_dataset(te_seed, te_n, num_target, tr_freq);  % La frecuencia en el test es la misma que en el training -> Tiene que ser asi?? ---------
-
 
 %
 % Parameters for optimization
@@ -25,7 +21,7 @@ isg_m = 0.05; isg_al0=2; isg_k=0.3;                           % stochastic gradi
 % Optimization
 %
 t1=clock;                               % Mirar si num_target hace falta -----------------------------------------------------------------------------------
-[wo,fo,tr_acc,te_acc,niter,tex] = uo_nn_solve(num_target,la,epsG,kmax,ils,ialmax,kmaxBLS,epsal,c1,c2,isd,isg_m,isg_al0,isg_k,icg,irc,nu,Xtr,ytr);
+[Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex]=uo_nn_solve(num_target,tr_freq,tr_seed,tr_p,te_seed,te_q,la,epsG,kmax,ils,ialmax,kmaxBLS,epsal,c1,c2,isd,sg_ga1,sg_al0,sg_ga2,icg,irc,nu)
 t2=clock;
 fprintf(' wall time = %6.1d s.\n', etime(t2,t1));
 %
