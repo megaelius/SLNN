@@ -45,26 +45,28 @@ Generals:
 
 function [xk,iWk,niter] = om_uo_solve(x,f,g,epsG,kmax,c1,c2,isd,icg,irc,epsal,kmaxBLS,nu,ialmax)
     n = length(x); k = 1;
-    xk = zeros(n, kmax); dk = zeros(n, kmax); Hk = zeros(n, n, kmax);
-    iWk = zeros(1, kmax); alk = zeros(kmax);
-    xk(:, 1) = x; Hk(:, :, 1) = eye(n);  % Initialation vector
+    xk = zeros(n, kmax); d_act = zeros(n, 1); H_act = zeros(n, n);
+    iWk = zeros(1, kmax); al_act = 0;
+    xk(:, 1) = x;  % Initialation vector
     while k < kmax && norm(g(xk(:, k))) > epsG
-        xact = xk(:, k);
+        d_ant = d_act; H_ant = H_act; al_ant = al_act;
+        x_act = xk(:, k);
+
         % Computation of the descent direction given the method
-        dk(:, k) = descent_direction(xk, g, Hk(:, :, k), isd, icg, irc, nu, dk, k);
+        d_act = descent_direction(xk, g, Hk(:, :, k), isd, icg, irc, nu, dk, k);
 
         % Computation of the alfa given the descent direction
         if k == 1, alpham = 2;
-        elseif ialmax == 1, alpham = alk(k - 1) * g(xk(:, k - 1))' * dk(:, k - 1) / (g(xact)' * dk(:, k));
-        elseif ialmax == 2, alpham = 2 * (f(xact) - f(xk(:, k - 1))) / (g(xact)' * dk(:, k));
+        elseif ialmax == 1, alpham = al_ant * g(xk(:, k-1))' * d_ant / (g(x_act)' * d_act);
+        elseif ialmax == 2, alpham = 2 * (f(x_act) - f(xk(:, k-1))) / (g(x_act)' * d_act);
         end
-        [alk(k), iWk(k)] = uo_BLSNW32(f,g,xact,dk(:, k),alpham,c1,c2,kmaxBLS,epsal);
+        [al_act, iWk(k)] = uo_BLSNW32(f,g,x_act,d_act,alpham,c1,c2,kmaxBLS,epsal);
 
         % Vector's update
-        xk(:, k + 1) = xact + alk(k)*dk(:, k);
+        xk(:, k + 1) = x_act + al_act*d_act;
         if isd == 3
-            y = g(xk(:, k + 1)) - g(xact); s = xk(:, k + 1) - xact; rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
-            Hk(:, :, k + 1) = (eye(n) - rhok*s*y') * Hk(:, :, k) * (eye(n) - rhok*y*s') + rhok*(s*s');
+            y = g(xk(:, k + 1)) - g(x_act); s = xk(:, k + 1) - x_act; rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
+            H_act = (eye(n) - rhok*s*y') * H_ant * (eye(n) - rhok*y*s') + rhok*(s*s');
         end
         k = k + 1;
     end
