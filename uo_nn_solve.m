@@ -13,7 +13,7 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex]=uo_nn_solve(num_target,
     y = @(X,w) sig(w'*sig(X));
     L = @(w) norm(y(Xtr,w)-ytr)^2 + (la*norm(w)^2)/2;
     gL = @(w) 2*sig(Xtr)*((y(Xtr,w)-ytr).*y(Xtr,w).*(1-y(Xtr,w)))'+la*w;
-    [wk,iWk,niter] = om_uo_solve(w,L,gL,epsG,kmax,c1,c2,isd,icg,irc,epsal,kmaxBLS,nu);
+    [wk,iWk,niter] = om_uo_solve(w,L,gL,epsG,kmax,c1,c2,isd,icg,irc,epsal,kmaxBLS,nu,ialmax);
     wo = wk(:,length(wk));
     tex = 0;tr_acc = 0; te_acc = 0;
     fo = L(wo);

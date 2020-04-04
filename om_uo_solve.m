@@ -43,20 +43,25 @@ Generals:
 
 
 
-function [xk,iWk,niter] = om_uo_solve(x,f,g,epsG,kmax,c1,c2,isd,icg,irc,epsal,kmaxBLS,nu)
+function [xk,iWk,niter] = om_uo_solve(x,f,g,epsG,kmax,c1,c2,isd,icg,irc,epsal,kmaxBLS,nu,ialmax)
     n = length(x); k = 1;
     xk = zeros(n, kmax); dk = zeros(n, kmax); Hk = zeros(n, n, kmax);
-    iWk = zeros(1, kmax);
+    iWk = zeros(1, kmax); alk = zeros(kmax);
     xk(:, 1) = x; Hk(:, :, 1) = eye(n);  % Initialation vector
     while k < kmax && norm(g(xk(:, k))) > epsG
         xact = xk(:, k);
         % Computation of the descent direction given the method
         dk(:, k) = descent_direction(xk, g, Hk(:, :, k), isd, icg, irc, nu, dk, k);
+
         % Computation of the alfa given the descent direction
-        alpham = 2;%2 * (f(xact) - f(xk(:, k - 1))) / (g(xact)' * dk(:, k))
-        [al, iWk(k)] = uo_BLSNW32(f,g,xact,dk(:, k),alpham,c1,c2,kmaxBLS,epsal);
+        if k == 1, alpham = 2;
+        elseif ialmax == 1, alpham = alk(k - 1) * g(xk(:, k - 1))' * dk(:, k - 1) / (g(xact)' * dk(:, k));
+        elseif ialmax == 2, alpham = 2 * (f(xact) - f(xk(:, k - 1))) / (g(xact)' * dk(:, k));
+        end
+        [alk(k), iWk(k)] = uo_BLSNW32(f,g,xact,dk(:, k),alpham,c1,c2,kmaxBLS,epsal);
+
         % Vector's update
-        xk(:, k + 1) = xact + al*dk(:, k);
+        xk(:, k + 1) = xact + alk(k)*dk(:, k);
         if isd == 3
             y = g(xk(:, k + 1)) - g(xact); s = xk(:, k + 1) - xact; rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
             Hk(:, :, k + 1) = (eye(n) - rhok*s*y') * Hk(:, :, k) * (eye(n) - rhok*y*s') + rhok*(s*s');
