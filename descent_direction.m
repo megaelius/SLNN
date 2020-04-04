@@ -1,4 +1,4 @@
-function dk = descent_direction(xk, g, H, isd, icg, irc, nu, dk, k)
+function dk = descent_direction(xk, g, H, isd, icg, irc, nu, d_ant, k)
 
     gx = g(xk(:, k)); betak = 0;
 
@@ -17,7 +17,7 @@ function dk = descent_direction(xk, g, H, isd, icg, irc, nu, dk, k)
             else, betak = max(gx' * (gx - gprev) / norm(gprev)^2, 0);
             end
         end
-        dk = -gx + betak * dk(:, k - 1); % Computation descent direction
+        dk = -gx + betak * d_ant; % Computation descent direction
 
     % BFGS
     elseif isd == 3, dk = -H * gx;

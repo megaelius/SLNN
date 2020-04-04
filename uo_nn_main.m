@@ -25,5 +25,5 @@ t1=clock;                               % Mirar si num_target hace falta -------
 t2=clock;
 fprintf(' wall time = %6.1d s.\n', etime(t2,t1));
 uo_nn_Xyplot(Xtr,ytr,wo);
-
+fprintf("niter: %d\n",niter);
 %

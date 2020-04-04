@@ -53,7 +53,7 @@ function [xk,iWk,niter] = om_uo_solve(x,f,g,epsG,kmax,c1,c2,isd,icg,irc,epsal,km
         x_act = xk(:, k);
 
         % Computation of the descent direction given the method
-        d_act = descent_direction(xk, g, Hk(:, :, k), isd, icg, irc, nu, dk, k);
+        d_act = descent_direction(xk, g, H_ant, isd, icg, irc, nu, d_ant, k);
 
         % Computation of the alfa given the descent direction
         if k == 1, alpham = 2;
