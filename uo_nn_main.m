@@ -13,7 +13,7 @@ te_seed    = 789101;    % Seed of the test.
 % Parameters for optimization
 %
 la = 1.0;                                                     % L2 regularization.
-epsG = 10^-6; kmax = 100000;                                   % Stopping criterium.
+epsG = 10^-6; kmax = 10000;                                   % Stopping criterium.
 ils=3; ialmax = 2; kmaxBLS=30; epsal=10^-3;c1=0.01; c2=0.45;  % Linesearch.
 isd = 1; icg = 2; irc = 2 ; nu = 1.0;                         % Search direction.
 sg_ga1 = 0.05; sg_al0=2; sg_ga2=0.3;                           % stochastic gradient
@@ -25,4 +25,5 @@ t1=clock;                               % Mirar si num_target hace falta -------
 t2=clock;
 fprintf(' wall time = %6.1d s.\n', etime(t2,t1));
 uo_nn_Xyplot(Xtr,ytr,wo);
+
 %
