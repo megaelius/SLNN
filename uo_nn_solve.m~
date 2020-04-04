@@ -17,4 +17,5 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex]=uo_nn_solve(num_target,
     wo = wk(:,length(wk));
     tex = 0;tr_acc = 0; te_acc = 0;
     fo = L(wo);
+    wo
 end

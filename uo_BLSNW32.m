@@ -1,4 +1,4 @@
-function [alphas,iout] = uo_BLSNW32(	)
+function [alphas,iout] = uo_BLSNW32(f,g0,x0,d,alpham,c1,c2,maxiter,eps)
 % function alphas = strongwolfe(f,d,x0,alpham)
 % Line search algorithm satisfying strong Wolfe conditions
 % Algorithms 3.5 on pages 60-61 in Nocedal and Wright
@@ -125,4 +125,4 @@ while (1~=2),
       end
       alphal = alphax;
    end
-end 
+end
