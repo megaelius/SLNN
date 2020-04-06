@@ -6,44 +6,28 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
     %
     [Xtr, ytr] = uo_nn_dataset(tr_seed, tr_p, num_target, tr_freq);
     [Xte, yte] = uo_nn_dataset(te_seed, te_q, num_target, tr_freq);  % La frecuencia en el test es la misma que en el training -> Tiene que ser asi?? ---------
-
-    size(ytr);
     
     w0 = zeros(35, 1); %punto inicial
     sig = @(X) 1 ./ (1 + exp(-X));
     y = @(X, w) sig(w' * sig(X));
-    L = @(X, Y, w) norm(y(X, w) - Y)^2 + (la * norm(w)^2)/2;
+    L = @(w) norm(y(Xtr, w) - ytr)^2 + (la * norm(w)^2)/2;
     gL = @(X, Y, w) 2 * sig(X) * ((y(X, w) - Y) .* y(X, w) .* (1 - y(X, w)))' + la * w;
     g = @(w) gL(Xtr, ytr, w);
 
-
-    n = length(w0); k = 1;
+    n = length(w0); k = 1; norma = 1;
     wk = zeros(n, kmax); d_act = zeros(n, 1); H_act = eye(n);
     iWk = zeros(1, kmax); al_act = 0;
-    wk(:, 1) = w0;  % Initialation vector
+    wk(:, 1) = w0;
 
-    while k < kmax && norm(gL(Xtr,ytr,wk(:, k))) > epsG
-        fprintf("%d\n", k);
+    while k < kmax && norma > epsG
         d_ant = d_act; H_ant = H_act; al_ant = al_act;
         w_act = wk(:, k);
 
         % Computation of the descent direction given the method
-        d_act = descent_direction(Xtr, ytr, wk, gL, H_ant, isd, icg, irc, nu, d_ant, k, sg_ga1, tr_p);
+        [d_act, norma] = descent_direction(Xtr, ytr, wk, g, gL, H_ant, isd, icg, irc, nu, d_ant, k, sg_ga1, tr_p);
 
         % Computation of the alfa given the descent direction
-        if k == 1, alpham = 2;
-        elseif ialmax == 1, alpham = al_ant * g(wk(:, k-1))' * d_ant / (g(w_act)' * d_act);
-        elseif ialmax == 2, alpham = 2 * (L(Xtr, ytr, w_act) - L(Xtr, ytr, wk(:, k-1))) / (g(w_act)' * d_act);
-        end
-
-        if isd == 7
-            ksg = floor(sg_ga2*kmax);
-            al_act = 0.01*sg_al0;
-            if k <= ksg
-                al_act = (1 - k/ksg)*sg_al0 + (k/ksg)*al_act;
-            end
-        else, [al_act, iWk(k)] = uo_BLSNW32(@(w) L(Xtr, ytr, w),g,w_act,d_act,alpham,c1,c2,kmaxBLS,epsal);
-        end
+        [al_act, iWk(k)] = find_alpha(L,g,w_act,d_act,c1,c2,kmaxBLS,epsal,al_ant,k,wk,d_ant,ialmax,sg_ga2,sg_al0,kmax,isd);
 
         % Vector's update
         wk(:, k + 1) = w_act + al_act*d_act;
@@ -60,5 +44,5 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
 
     wo = wk(:, length(wk));
     tex = 0; tr_acc = 0; te_acc = 0;
-    fo = L(Xtr, ytr, wo);
+    fo = L(wo);
 end

@@ -1,6 +1,4 @@
-function dk = descent_direction(Xtr, ytr, wk, gL, H, isd, icg, irc, nu, d_ant, k, sg_ga1, tr_p)
-
-    g = @(w) gL(Xtr, ytr, w);
+function [dk, norma] = descent_direction(Xtr, ytr, wk, g, gL, H, isd, icg, irc, nu, d_ant, k, sg_ga1, tr_p)
     gw = g(wk(:, k)); betak = 0;
 
     % Gradient method
@@ -22,6 +20,8 @@ function dk = descent_direction(Xtr, ytr, wk, gL, H, isd, icg, irc, nu, d_ant, k
 
     % BFGS
     elseif isd == 3, dk = -H * gw;
+        
+    % Stochastic gradient method
     elseif isd == 7
         m = floor(sg_ga1*tr_p);
         aux = randsample(tr_p, m);
@@ -29,4 +29,6 @@ function dk = descent_direction(Xtr, ytr, wk, gL, H, isd, icg, irc, nu, d_ant, k
         g = @(w) gL(Xtrs, ytrs, w);
         dk = - 1/m * g(wk(:, k));
     end
+    
+    norma = norm(g(wk(:, k)));
 end
