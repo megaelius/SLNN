@@ -4,5 +4,23 @@ output: html_notebook
 ---
 
 ```{r}
-read.table()
+x <- read.table("uo_nn_batch_230580-158096.csv",header = TRUE,sep = ";")
+x
 ```
+```{r}
+plot(x$tex,type = "n",xlim = c(0,30))
+colors <- c("red","blue","green")
+isd <-  c(1,3,7)
+for(i in 1:3){
+    points(x$tex[x$isd == isd[i]],col = colors[i])
+}
+
+```
+```{r}
+mean = c(0:9)
+for(i in 0:9){
+    mean[i+1] = mean(x$te_acc[x$num_target == i])
+}
+mean
+```
+
