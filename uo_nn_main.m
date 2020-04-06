@@ -1,8 +1,9 @@
 clear;
+clc;
 %
 % Parameters for dataset generation
 %
-num_target = [1];       % Number we want to recognize.
+num_target = [3];       % Number we want to recognize.
 tr_freq    = .5;        % Frequency of the number we want to recongize in the training set.
 tr_p       = 250;       % Number of training images.
 te_q       = 250;       % Number of test images.
@@ -13,10 +14,10 @@ te_seed    = 789101;    % Seed of the test.
 % Parameters for optimization
 %
 la = 1.0;                                                     % L2 regularization.
-epsG = 10^-6; kmax = 10000;                                   % Stopping criterium.
+epsG = 10^-6; kmax = 1000;                                    % Stopping criterium.
 ils=2; ialmax = 2; kmaxBLS=30; epsal=10^-3;c1=0.01; c2=0.45;  % Linesearch.
-isd = 1; icg = 2; irc = 2 ; nu = 1.0;                         % Search direction.
-sg_ga1 = 0.05; sg_al0=2; sg_ga2=0.3;                          % stochastic gradient
+isd = 7; icg = 2; irc = 2 ; nu = 1.0;                         % Search direction.
+sg_ga1 = 1; sg_al0 = 2; sg_ga2 = 0.3;                          % stochastic gradient
 %
 % Optimization
 %
