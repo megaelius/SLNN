@@ -13,13 +13,13 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
     L = @(w) norm(y(Xtr, w) - ytr)^2 + (la * norm(w)^2)/2;
     gL = @(X, Y, w) 2 * sig(X) * ((y(X, w) - Y) .* y(X, w) .* (1 - y(X, w)))' + la * w;
     g = @(w) gL(Xtr, ytr, w);
-
+    acc = @(Xds,yds,wo) 100*sum(yds==round(y(Xds,wo)))/size(Xds,2); %accuracy
 
     n = length(w0); k = 1; norma = 1;
     wk = zeros(n, kmax); d_act = zeros(n, 1); H_act = eye(n);
     iWk = zeros(1, kmax); al_act = 0;
     wk(:, 1) = w0;
-
+    t1 = clock;
     while k < kmax && norma > epsG
         d_ant = d_act; H_ant = H_act; al_ant = al_act;
         w_act = wk(:, k);
@@ -35,15 +35,14 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
         if isd == 3
             y = g(wk(:, k + 1)) - g(w_act); s = wk(:, k + 1) - w_act; rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
             H_act = (eye(n) - rhok*s*y') * H_ant * (eye(n) - rhok*y*s') + rhok*(s*s');
-        end
-        fprintf("k = %d, acc = %f , norm = %f, al = %f\n",k,acc(Xtr,ytr,wk(:, k + 1)),norm(gL(Xtr,ytr,wk(:, k+1))),al_act); 
+        end 
         k = k + 1;
     end
     t2 = clock;
-    
     iWk = iWk(1:k); iWk(k) = NaN; wk = wk(:, 1:k);
     niter = k;
-    wo = wk(:, length(wk));
-    tex = 0; tr_acc = 0; te_acc = 0;
+    wo = wk(:, k);
+    tex = etime(t2,t1); 
+    tr_acc = acc(Xtr,ytr,wo); te_acc = acc(Xte,yte,wo);
     fo = L(wo);
 end
