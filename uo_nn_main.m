@@ -17,7 +17,7 @@ la = 1.0;                                                     % L2 regularizatio
 epsG = 10^-6; kmax = 1000;                                    % Stopping criterium.
 ils=2; ialmax = 2; kmaxBLS=30; epsal=10^-3;c1=0.01; c2=0.45;  % Linesearch.
 isd = 7; icg = 2; irc = 2 ; nu = 1.0;                         % Search direction.
-sg_ga1 = 1; sg_al0 = 2; sg_ga2 = 0.3;                          % stochastic gradient
+sg_ga1 = 0.05; sg_al0 = 2; sg_ga2 = 0.3;                      % stochastic gradient
 %
 % Optimization
 %

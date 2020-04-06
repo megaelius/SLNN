@@ -6,8 +6,6 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
     %
     [Xtr, ytr] = uo_nn_dataset(tr_seed, tr_p, num_target, tr_freq);
     [Xte, yte] = uo_nn_dataset(te_seed, te_q, num_target, tr_freq);  % La frecuencia en el test es la misma que en el training -> Tiene que ser asi?? ---------
-
-    size(ytr);
     
     w0 = zeros(35, 1); %punto inicial
     sig = @(X) 1 ./ (1 + exp(-X));
@@ -15,15 +13,15 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
     L = @(X, Y, w) norm(y(X, w) - Y)^2 + (la * norm(w)^2)/2;
     gL = @(X, Y, w) 2 * sig(X) * ((y(X, w) - Y) .* y(X, w) .* (1 - y(X, w)))' + la * w;
     g = @(w) gL(Xtr, ytr, w);
-
+    acc = @(Xds,yds,wo) 100*sum(yds==round(y(Xds,wo)))/size(Xds,2);
 
     n = length(w0); k = 1;
     wk = zeros(n, kmax); d_act = zeros(n, 1); H_act = eye(n);
     iWk = zeros(1, kmax); al_act = 0;
     wk(:, 1) = w0;  % Initialation vector
-
+    
+    t1 = clock;
     while k < kmax && norm(gL(Xtr,ytr,wk(:, k))) > epsG
-        fprintf("%d\n", k);
         d_ant = d_act; H_ant = H_act; al_ant = al_act;
         w_act = wk(:, k);
 
@@ -51,14 +49,15 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
             y = g(wk(:, k + 1)) - g(w_act); s = wk(:, k + 1) - w_act; rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
             H_act = (eye(n) - rhok*s*y') * H_ant * (eye(n) - rhok*y*s') + rhok*(s*s');
         end
-
+        fprintf("k = %d, acc = %f , norm = %f, al = %f\n",k,acc(Xtr,ytr,wk(:, k + 1)),norm(gL(Xtr,ytr,wk(:, k+1))),al_act); 
         k = k + 1;
     end
+    t2 = clock;
+    
     iWk = iWk(1:k); iWk(k) = NaN; wk = wk(:, 1:k);
     niter = k;
-
-
     wo = wk(:, length(wk));
-    tex = 0; tr_acc = 0; te_acc = 0;
+    tex = etime(t2,t1);
+    tr_acc = acc(Xtr,ytr,wo); te_acc = acc(Xte,yte,wo);
     fo = L(Xtr, ytr, wo);
 end
