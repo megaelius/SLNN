@@ -14,6 +14,7 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
     gL = @(X, Y, w) 2 * sig(X) * ((y(X, w) - Y) .* y(X, w) .* (1 - y(X, w)))' + la * w;
     g = @(w) gL(Xtr, ytr, w);
 
+
     n = length(w0); k = 1; norma = 1;
     wk = zeros(n, kmax); d_act = zeros(n, 1); H_act = eye(n);
     iWk = zeros(1, kmax); al_act = 0;
@@ -35,13 +36,13 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
             y = g(wk(:, k + 1)) - g(w_act); s = wk(:, k + 1) - w_act; rhok = 1 / (y' * s);  % Auxiliary variables s, y, rho
             H_act = (eye(n) - rhok*s*y') * H_ant * (eye(n) - rhok*y*s') + rhok*(s*s');
         end
-
+        fprintf("k = %d, acc = %f , norm = %f, al = %f\n",k,acc(Xtr,ytr,wk(:, k + 1)),norm(gL(Xtr,ytr,wk(:, k+1))),al_act); 
         k = k + 1;
     end
+    t2 = clock;
+    
     iWk = iWk(1:k); iWk(k) = NaN; wk = wk(:, 1:k);
     niter = k;
-
-
     wo = wk(:, length(wk));
     tex = 0; tr_acc = 0; te_acc = 0;
     fo = L(wo);
