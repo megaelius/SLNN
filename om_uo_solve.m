@@ -45,7 +45,7 @@ Generals:
 
 function [xk,iWk,niter] = om_uo_solve(x,f,g,epsG,kmax,c1,c2,isd,icg,irc,epsal,kmaxBLS,nu,ialmax)
     n = length(x); k = 1;
-    xk = zeros(n, kmax); d_act = zeros(n, 1); H_act = zeros(n, n);
+    xk = zeros(n, kmax); d_act = zeros(n, 1); H_act = eye(n);
     iWk = zeros(1, kmax); al_act = 0;
     xk(:, 1) = x;  % Initialation vector
     while k < kmax && norm(g(xk(:, k))) > epsG
