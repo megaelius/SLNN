@@ -15,7 +15,7 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
     g = @(w) gL(Xtr, ytr, w);
     acc = @(Xds,yds,wo) 100*sum(yds==round(y(Xds,wo)))/size(Xds,2); %accuracy
 
-    n = length(w0); k = 1; g_act = 1;
+    n = length(w0); k = 1; g_act = 1; 
     wk = zeros(n, kmax); d_act = zeros(n, 1); H_act = eye(n);
     iWk = zeros(1, kmax); al_act = 0;
     wk(:, 1) = w0;
