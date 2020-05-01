@@ -19,7 +19,7 @@ function [dk, g_act] = descent_direction(Xtr, ytr, wk, g, gL, H, isd, icg, irc, 
         dk = -g_act + betak * d_ant; % Computation descent direction
 
     % BFGS
-elseif isd == 3, dk = -H * g_act;
+    elseif isd == 3, dk = -H * g_act;
 
     % Stochastic gradient method
     elseif isd == 7

@@ -14,7 +14,9 @@ function [Xtr,ytr,wo,fo,tr_acc,Xte,yte,te_acc,niter,tex] = uo_nn_solve(num_targe
     gL = @(X, Y, w) 2 * sig(X) * ((y(X, w) - Y) .* y(X, w) .* (1 - y(X, w)))' + la * w;
     g = @(w) gL(Xtr, ytr, w);
     acc = @(Xds,yds,wo) 100*sum(yds==round(y(Xds,wo)))/size(Xds,2); %accuracy
-
+    
+    %g_ant is initialize to 1 only for entering the while, this value is
+    %never used
     n = length(w0); k = 1; g_act = 1; 
     wk = zeros(n, kmax); d_act = zeros(n, 1); H_act = eye(n);
     iWk = zeros(1, kmax); al_act = 0;
